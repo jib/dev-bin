@@ -45,13 +45,31 @@ my @mods =  map {
         ### header
         printf "\n\n================ %s ===============\n\n", $obj->module;
 
-
         ### version info
-        {   local @INC = @Inc;
-            printf  "%-12s %-18s %-18s\n\n",
+        {   my $have = do {
+                local @INC = @Inc;
+                local $Module::Load::Conditional::CHECK_INC_HASH = 0;
+                $obj->installed_version
+            };
+            
+            my $core = do {
+                local @INC = qw[/Users/kane/sources/perl-dev/perl-current/lib];
+                local $Module::Load::Conditional::CHECK_INC_HASH = 0;
+                $obj->installed_version
+            };
+            
+            my $update_core = ( $core 
+                                and $obj->version !~ /_/
+                                and $obj->version != $core 
+                              ) ? '*** UPDATE CORE ***'
+                                : '';
+    
+            printf  "%-12s %-14s %-14s %-14s %-20s\n\n",
                     'VERSIONS',
-                    "[HAVE: " . $obj->installed_version   .'] ',
-                    "[CPAN: " . $obj->version             .'] ';   
+                    "[HAVE: " . $have           .'] ',
+                    "[CORE: " . $core           .'] ',
+                    "[CPAN: " . $obj->version   .'] ',
+                    $update_core;   
         }
         
         ### outstanding issues in RT
