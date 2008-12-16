@@ -58,18 +58,26 @@ my @mods =  map {
                 $obj->installed_version
             };
             
-            my $update_core = ( $core 
-                                and $obj->version !~ /_/
-                                and $obj->version != $core 
-                              ) ? '*** UPDATE CORE ***'
-                                : '';
+            my @to_update;
+            {   no warnings 'numeric';
+                push @to_update, 'CPAN' if $obj->version and $obj->version != $have;
+                push @to_update, 'CORE' if( $core 
+                                            and $have !~ /_/
+                                            and $have != $core 
+                                         );
+            }
+            
+            my $update = @to_update 
+                            ? '*** UPDATE ' . join(' & ', @to_update) . ' ***'
+                            : '';
+
     
             printf  "%-12s %-14s %-14s %-14s %-20s\n\n",
                     'VERSIONS',
                     "[HAVE: " . $have           .'] ',
                     "[CORE: " . $core           .'] ',
                     "[CPAN: " . $obj->version   .'] ',
-                    $update_core;   
+                    $update;
         }
         
         ### outstanding issues in RT
