@@ -97,7 +97,7 @@ my @mods =  map {
             unless( $U->_vcmp( $obj->installed_version, $obj->version ) ) {
 
                 my $log_dir = $obj->installed_dir . '/..';
-                my @out = grep { length } split /---+/, join '', `svk log $log_dir`;
+                my @out = grep { length } split /---+/, join '', `svk log -x $log_dir`;
     
                 my $ver = $obj->version;
     
@@ -106,6 +106,9 @@ my @mods =  map {
                 for( @out ) {
                     last if /this\s+(?:be|is)\s+$ver/i;         # release
                     last if /\ncopy\n/;                         # copy only
+                    last if /\* copy to local/;                 # copy only
+                    last if /Commit history from perforce during svk import/;
+                    
                     next if /^\s*?r\d+:\s*?kane[^\n]+\n\s*$/;   # empty commit
                     $i++;
                     $msg .= $_;
